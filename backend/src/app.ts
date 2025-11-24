@@ -1,10 +1,13 @@
+// 1. IMPORTACIÓN DIRECTA (Esto fuerza la carga inmediata)
+import 'dotenv/config'; 
+
+// 2. AHORA EL RESTO DE IMPORTS
 import express, { Application, Request, Response } from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db'; 
+import { router as authRouter } from './routes/auth';
 
-// Configuration
-dotenv.config();
+// Ya no necesitas llamar a dotenv.config() aquí abajo, la línea 1 ya lo hizo.
 
 // Database Connection
 connectDB(); 
@@ -13,8 +16,11 @@ const app: Application = express();
 const port = process.env.PORT || 3000;
 
 // Middlewares
-app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Parse incoming JSON requests
+app.use(cors());
+app.use(express.json());
+
+// Rutas
+app.use('/auth', authRouter);
 
 // Test Route
 app.get('/', (req: Request, res: Response) => {
