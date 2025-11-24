@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 export const sendVerificationCode = async (email: string, code: string) => {
     try {
         await transporter.sendMail({
-            from: '"Swapi Team" <no-reply@swapi.com>',
+            from: `"Swapi Team" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Welcome to Swapi! Verify your account',
             html: `
