@@ -1,21 +1,21 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-// 1. Interface: Define la estructura para TypeScript (Tu seguridad mientras programas)
+// 1. Interface: Define la estructura para TypeScript
 export interface IUser extends Document {
     firstName: string;
-    paternalSurname: string; // Apellido Paterno
-    maternalSurname: string; // Apellido Materno
+    paternalSurname: string;
+    maternalSurname: string;
     email: string;
     password: string;
     age: number;
     gender: string;
     phone: string;
-    role: 'student' | 'admin'; // Roles definidos en el reporte
-    isVerified: boolean; // Para saber si ya validó su correo
-    verificationCode?: string; // El código PIN temporal
+    role: 'student' | 'admin';
+    isVerified: boolean;
+    verificationCode?: string;
 }
 
-// 2. Schema: Define la estructura para MongoDB (Reglas de la base de datos)
+// 2. Schema: Define la estructura para MongoDB
 const UserSchema: Schema = new Schema({
     firstName: { 
         type: String, 
@@ -35,7 +35,7 @@ const UserSchema: Schema = new Schema({
     email: { 
         type: String, 
         required: true, 
-        unique: true, // No pueden haber dos correos iguales
+        unique: true, 
         lowercase: true,
         trim: true
     },
@@ -68,7 +68,12 @@ const UserSchema: Schema = new Schema({
         type: String 
     }
 }, {
-    timestamps: true // Crea automáticamente campos createdAt y updatedAt
+    timestamps: true
+});
+
+UserSchema.index({ createdAt: 1 }, { 
+    expireAfterSeconds: 900, 
+    partialFilterExpression: { isVerified: false } 
 });
 
 // 3. Exportar el Modelo
