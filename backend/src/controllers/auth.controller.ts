@@ -12,21 +12,51 @@ const registerCtrl = async (req: Request, res: Response) => {
 
         // 1. Verificar si el usuario ya existe
         const checkIs = await UserModel.findOne({ email });
-        if (checkIs) return res.status(400).send('EL_CORREO_YA_EXISTE');
 
-        // 2. Validar correo institucional (Filtro simple)
-        if (!email.endsWith('@ulsachihuahua.edu.mx')) { // Ajusta el dominio según corresponda
-             // Opcional: permitir otros dominios si es necesario, pero el reporte dice "exclusiva"
+        // Generamos el código y encriptamos la contraseña desde antes para usarlos en ambos casos
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const passwordHash = await encrypt(password);
+
+        if (checkIs) {
+            // CASO A: El usuario existe Y YA ESTÁ VERIFICADO
+            if (checkIs.isVerified) {
+                return res.status(400).send({
+                    success: false,
+                    message: 'EL_CORREO_YA_EXISTE',
+                    user: null
+                });
+            } 
+            
+            // CASO B: El usuario existe PERO NO ESTÁ VERIFICADO (Tu caso)
+            // Solución: Actualizamos sus datos y le mandamos un código nuevo
+            await UserModel.updateOne({ email }, {
+                firstName,
+                paternalSurname,
+                maternalSurname,
+                password: passwordHash, // Actualizamos por si se equivocó en la pass anterior
+                age,
+                gender,
+                phone,
+                verificationCode // Guardamos el nuevo código
+            });
+
+            // Reenviamos el correo
+            await sendVerificationCode(email, verificationCode);
+
+            return res.send({ 
+                success: true,
+                message: 'Usuario pendiente actualizado. Se ha reenviado el código.', 
+                user: checkIs 
+            });
+        }
+
+        // CASO C: El usuario NO existe (Usuario Nuevo)
+        // 2. Validar correo institucional (si aplica)
+        if (!email.endsWith('@ulsachihuahua.edu.mx')) { 
              // return res.status(400).send('SOLO_CORREOS_INSTITUCIONALES');
         }
 
-        // 3. Encriptar contraseña
-        const passwordHash = await encrypt(password);
-
-        // 4. Generar código de verificación (6 dígitos)
-        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-        // 5. Guardar usuario (pero isVerified: false)
+        // 3. Crear el usuario nuevo
         const newUser = await UserModel.create({
             firstName,
             paternalSurname,
@@ -37,16 +67,20 @@ const registerCtrl = async (req: Request, res: Response) => {
             gender,
             phone,
             verificationCode,
-            isVerified: false // Importante: empieza sin verificar
+            isVerified: false 
         });
 
-        // 6. Enviar correo
+        // 4. Enviar correo
         await sendVerificationCode(email, verificationCode);
 
-        res.send({ message: 'Usuario creado. Revisa tu correo para el código de verificación.', user: newUser });
+        res.send({ 
+            success: true,
+            message: 'Usuario creado. Revisa tu correo para el código de verificación.', 
+            user: newUser 
+        });
 
     } catch (e) {
-        console.log(e); // Para ver el error en consola
+        console.log(e);
         res.status(500).send('ERROR_REGISTER_USER');
     }
 };
@@ -69,7 +103,12 @@ const loginCtrl = async (req: Request, res: Response) => {
         const token = generateToken(user.id);
         
         // Enviamos el token y los datos del usuario al frontend/app
-        res.send({ token, user });
+        res.send({
+            success: true,         // Agregamos esto para ayudar al frontend
+            message: "Bienvenido", // Agregamos esto para mostrar en un Toast
+            token,
+            user
+        });
 
     } catch (e) {
         res.status(500).send('ERROR_LOGIN_USER');
@@ -87,7 +126,7 @@ const verifyCodeCtrl = async (req: Request, res: Response) => {
         if (user.verificationCode === code) {
             // Actualizamos el usuario a verificado
             await UserModel.updateOne({ email }, { isVerified: true, verificationCode: '' });
-            res.send('VERIFICACION_EXITOSA');
+            res.json({ success: true, message: 'VERIFICACION_EXITOSA' });
         } else {
             res.status(400).send('CODIGO_INCORRECTO');
         }

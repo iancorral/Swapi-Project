@@ -24,8 +24,8 @@ app.use(express.json());
 app.use('/storage', express.static('storage'));
 
 // Rutas
-app.use('/auth', authRouter);
-app.use('/post', postRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/post', postRouter);
 
 // Test Route
 app.get('/', (req: Request, res: Response) => {
