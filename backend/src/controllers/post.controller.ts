@@ -29,8 +29,7 @@ const createPost = async (req: RequestExt, res: Response) => {
 
         const postWithAuthor = await newPost.populate('author', 'firstName paternalSurname email phone');
 
-        res.send(postWithAuthor); // Enviamos el post YA poblado
-        // -----------------------
+        res.send(postWithAuthor); 
 
     } catch (e) {
         console.log(e);
@@ -41,27 +40,23 @@ const createPost = async (req: RequestExt, res: Response) => {
 // 1. OBTENER TODOS LOS POSTS
 const getPosts = async (req: Request, res: Response) => {
     try {
-        // Obtenemos los parámetros de la URL (ej: ?search=nintendo&category=ventas)
         const { search, category } = req.query;
         
-        // Filtro base: Solo traer los activos
         let query: any = { isActive: true };
 
-        // Si enviaron algo en "search", buscamos en título O descripción
         if (search) {
             query.$or = [
-                { title: { $regex: search, $options: 'i' } }, // 'i' = ignora mayúsculas
+                { title: { $regex: search, $options: 'i' } },
                 { description: { $regex: search, $options: 'i' } }
             ];
         }
 
-        // Si enviaron una categoría, filtramos exacto
         if (category) {
             query.category = category;
         }
 
         const posts = await PostModel.find(query)
-            .populate('author', 'firstName email'); // Traemos datos del autor
+            .populate('author', 'firstName email');
             
         res.send(posts);
     } catch (e) {
@@ -69,14 +64,13 @@ const getPosts = async (req: Request, res: Response) => {
     }
 };
 
-// 2. NUEVO: OBTENER UN SOLO POST (Detalle)
+// 2. OBTENER UN SOLO POST
 const getPost = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         
-        // Buscamos por ID y que esté activo
         const post = await PostModel.findOne({ _id: id, isActive: true })
-            .populate('author', 'firstName paternalSurname email phone'); // Traemos más datos para contactar
+            .populate('author', 'firstName paternalSurname email phone');
             
         if (!post) {
             return res.status(404).send('POST_NO_ENCONTRADO');
@@ -88,11 +82,10 @@ const getPost = async (req: Request, res: Response) => {
     }
 };
 
-// OBTENER SOLO MIS POSTS (Para el perfil del usuario)
+// OBTENER SOLO MIS POSTS
 const getMyPosts = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id; 
-        // Buscamos solo los que tengan TU id en el campo 'author'
         const posts = await PostModel.find({ author: userId, isActive: true })
             .populate('author', 'firstName email');
         
@@ -102,31 +95,26 @@ const getMyPosts = async (req: RequestExt, res: Response) => {
     }
 };
 
-// ELIMINAR UN POST (Dueño o Admin)
+// ELIMINAR UN POST
 const deletePost = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id; 
         const { id } = req.params; 
 
-        // 1. Buscamos el post
         const post = await PostModel.findOne({ _id: id });
         if (!post) {
             return res.status(404).send('POST_NO_ENCONTRADO');
         }
 
-        // 2. Buscamos quién está intentando borrar para ver su ROL
         const user = await UserModel.findById(userId);
 
-        // 3. REGLAS DE BORRADO:
-        const isOwner = post.author.toString() === userId; // ¿Es el dueño?
-        const isAdmin = user?.role === 'admin';            // ¿Es administrador?
+        const isOwner = post.author.toString() === userId;
+        const isAdmin = user?.role === 'admin';
 
-        // Si NO es dueño Y TAMPOCO es admin, entonces no tiene permiso
         if (!isOwner && !isAdmin) {
             return res.status(403).send('NO_TIENES_PERMISOS');
         }
 
-        // 4. Borrado Lógico
         post.isActive = false;
         await post.save();
 
@@ -140,40 +128,36 @@ const deletePost = async (req: RequestExt, res: Response) => {
     }
 };
 
-// ACTUALIZAR UN POST
-
+// ACTUALIZAR UN POST (CORREGIDO)
 const updatePost = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id; 
-        const { id } = req.params; // El ID del post a editar
-        const body = req.body; // Los nuevos datos (título, precio, etc.)
+        const { id } = req.params; 
+        const body = req.body; 
 
-        // 1. Buscamos el post
         const post = await PostModel.findOne({ _id: id });
 
         if (!post) {
             return res.status(404).send('POST_NO_ENCONTRADO');
         }
 
-        // 2. VALIDACIÓN DE DUEÑO: ¿Eres tú quien lo subió?
         if (post.author.toString() !== userId) {
             return res.status(403).send('NO_ERES_EL_DUEÑO');
         }
 
-        // 3. Actualizamos el post
-        // { new: true } hace que mongo te devuelva el post YA actualizado, no el viejo
+        // --- CORRECCIÓN AQUÍ: Añadimos .populate(...) al final ---
         const response = await PostModel.findOneAndUpdate(
             { _id: id },
             body,
             { new: true } 
-        );
+        ).populate('author', 'firstName paternalSurname email phone'); // <--- ¡ESTO FALTABA!
 
         res.send(response);
 
     } catch (e) {
+        console.log("ERROR EN UPDATE POST:", e);
         res.status(500).send('ERROR_UPDATE_POST');
     }
 };
 
-// ¡Agregamos updatePost al export!
 export { createPost, getPosts, getPost, getMyPosts, deletePost, updatePost };
