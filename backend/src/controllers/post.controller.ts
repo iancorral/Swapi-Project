@@ -13,12 +13,9 @@ const createPost = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id;
         
-        // Multer guarda la info del archivo en req.file
-        // Si hay archivo, guardamos su ruta. Si no, mandamos un array vacío.
         const file = req.file; 
-        const pathPhoto = file ? `${file.filename}` : ''; // Guardamos solo el nombre del archivo
+        const pathPhoto = file ? `${file.filename}` : '';
 
-        // Nota: body viene como texto, hay que tener cuidado
         const { title, description, price, category } = req.body;
 
         const newPost = await PostModel.create({
@@ -26,13 +23,17 @@ const createPost = async (req: RequestExt, res: Response) => {
             description,
             price,
             category,
-            images: [pathPhoto], // Guardamos la imagen en el array
+            images: [pathPhoto],
             author: userId
         });
 
-        res.send(newPost);
+        const postWithAuthor = await newPost.populate('author', 'firstName paternalSurname email phone');
+
+        res.send(postWithAuthor); // Enviamos el post YA poblado
+        // -----------------------
+
     } catch (e) {
-        console.log(e); // Para ver errores en consola
+        console.log(e);
         res.status(500).send('ERROR_CREATE_POST');
     }
 };
