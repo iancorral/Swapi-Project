@@ -5,7 +5,7 @@ export interface IPost extends Document {
     title: string;
     description: string;
     price: number;
-    category: 'ventas' | 'rentas' | 'servicios' | 'informacion';
+    category: 'ventas' | 'rentas' | 'servicios' | 'anuncios';
     images: string[]; // Guardaremos URLs de las imágenes (por ahora strings)
     author: Types.ObjectId; // Relación con el Usuario que lo creó
     isActive: boolean;
@@ -27,7 +27,7 @@ const PostSchema: Schema = new Schema(
         },
         category: {
             type: String,
-            enum: ['ventas', 'rentas', 'servicios', 'informacion'],
+            enum: ['ventas', 'rentas', 'servicios', 'anuncios'],
             required: true,
         },
         images: {
