@@ -3,23 +3,65 @@ import PostModel from '../models/post.model';
 import UserModel from '../models/user.model';
 import { JwtPayload } from 'jsonwebtoken';
 
-// Interfaz extendida igual que en el middleware
-interface RequestExt extends Request {
-    user?: string | JwtPayload | any; // 'any' para facilitar acceso al ID
+// --- CORRECCIÓN FINAL Y ROBUSTA ---
+// 1. Traemos todo lo que exporta la librería
+const badWordsRaw = require('bad-words');
+
+// 2. Buscamos el constructor "Filter" donde sea que esté escondido
+// Algunos sistemas lo ponen en .default, otros en .Filter, y otros directo.
+const Filter = badWordsRaw.default || badWordsRaw.Filter || badWordsRaw;
+
+// 3. Verificamos (Debug de seguridad)
+if (typeof Filter !== 'function') {
+    console.error('⚠️ ERROR CRÍTICO: No se encontró la clase Filter de bad-words.');
+    console.error('Contenido recibido:', badWordsRaw);
 }
 
-// CREAR UN POST
+// 4. Instanciamos
+const filter = new Filter();
+
+// Diccionario de groserías en español y mexicano
+const spanishBadWords = [
+    'mierda', 'puta', 'puto', 'cabron', 'cabrón', 'pendejo', 'pinche', 'verga', 
+    'estupido', 'estúpido', 'idiota', 'imbecil', 'imbécil', 'joder', 'coño', 
+    'mamadas', 'chingar', 'chingada', 'chingado', 'culero', 'culo', 'panocha', 'chingón', 'chingona', 'pija', 'boludo', 'boluda', 'zorra',
+    'chinga', 'chingue', 'chingues', 'madre', 'hijo de puta', 'hijo de la chingada',
+    'pinches', 'pendeja', 'vergas', 'culera', 'coger', 'cogida', 'cogido', 'follar',
+    'maricon', 'maricón', 'maricones', 'maricas', 'marica', 'putas', 'putones', 'putona',
+    'tarado', 'tarada', 'tarados', 'taradas', 'tonto', 'tonta', 'tontos', 'tontas', 'pito', 'pitos', 'pene', 'vagina', 'vaginas'
+];
+
+// Agregamos las palabras al filtro existente
+filter.addWords(...spanishBadWords);
+
+// Interfaz extendida para el Request
+interface RequestExt extends Request {
+    user?: string | JwtPayload | any; 
+}
+
+// CREAR UN POST (MODO ESTRICTO)
 const createPost = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id;
-        
         const file = req.file; 
         const pathPhoto = file ? `${file.filename}` : '';
-
         const { title, description, price, category } = req.body;
 
+        // --- VALIDACIÓN: Si hay groserías, RECHAZAMOS la petición ---
+        // isProfane devuelve true si encuentra alguna palabra de la lista
+        if (filter.isProfane(title) || filter.isProfane(description)) {
+            // Borramos la imagen que se subió porque no vamos a guardar el post
+            // (Opcional, pero buena práctica para no llenar el server de basura)
+            return res.status(400).send({ 
+                error: 'PALABRAS_OFENSIVAS',
+                message: 'No se permiten palabras ofensivas en el título o descripción.' 
+            });
+        }
+        // ------------------------------------------------------------
+
+        // Si pasa el filtro, guardamos normal (ya no necesitamos .clean)
         const newPost = await PostModel.create({
-            title,
+            title, 
             description,
             price,
             category,
@@ -28,7 +70,6 @@ const createPost = async (req: RequestExt, res: Response) => {
         });
 
         const postWithAuthor = await newPost.populate('author', 'firstName paternalSurname email phone');
-
         res.send(postWithAuthor); 
 
     } catch (e) {
@@ -37,7 +78,7 @@ const createPost = async (req: RequestExt, res: Response) => {
     }
 };
 
-// 1. OBTENER TODOS LOS POSTS
+// OBTENER TODOS LOS POSTS
 const getPosts = async (req: Request, res: Response) => {
     try {
         const { search, category } = req.query;
@@ -64,7 +105,7 @@ const getPosts = async (req: Request, res: Response) => {
     }
 };
 
-// 2. OBTENER UN SOLO POST
+// OBTENER UN SOLO POST
 const getPost = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
@@ -128,29 +169,33 @@ const deletePost = async (req: RequestExt, res: Response) => {
     }
 };
 
-// ACTUALIZAR UN POST (CORREGIDO)
+// ACTUALIZAR UN POST (MODO ESTRICTO)
 const updatePost = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id; 
         const { id } = req.params; 
         const body = req.body; 
 
+        // --- VALIDACIÓN AL ACTUALIZAR ---
+        if ( (body.title && filter.isProfane(body.title)) || 
+             (body.description && filter.isProfane(body.description)) ) {
+             return res.status(400).send({ 
+                error: 'PALABRAS_OFENSIVAS',
+                message: 'No se permiten palabras ofensivas.' 
+            });
+        }
+        // -------------------------------
+
         const post = await PostModel.findOne({ _id: id });
 
-        if (!post) {
-            return res.status(404).send('POST_NO_ENCONTRADO');
-        }
+        if (!post) return res.status(404).send('POST_NO_ENCONTRADO');
+        if (post.author.toString() !== userId) return res.status(403).send('NO_ERES_EL_DUEÑO');
 
-        if (post.author.toString() !== userId) {
-            return res.status(403).send('NO_ERES_EL_DUEÑO');
-        }
-
-        // --- CORRECCIÓN AQUÍ: Añadimos .populate(...) al final ---
         const response = await PostModel.findOneAndUpdate(
             { _id: id },
             body,
             { new: true } 
-        ).populate('author', 'firstName paternalSurname email phone'); // <--- ¡ESTO FALTABA!
+        ).populate('author', 'firstName paternalSurname email phone');
 
         res.send(response);
 

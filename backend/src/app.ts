@@ -7,6 +7,7 @@ import cors from 'cors';
 import connectDB from './config/db'; 
 import { router as authRouter } from './routes/auth';
 import { router as postRouter } from './routes/post';
+import { router as userStats } from "./routes/user";
 
 // Ya no necesitas llamar a dotenv.config() aquí abajo, la línea 1 ya lo hizo.
 
@@ -26,6 +27,7 @@ app.use('/storage', express.static('storage'));
 // Rutas
 app.use('/api/auth', authRouter);
 app.use('/api/post', postRouter);
+app.use("/api/user", userStats);
 
 // Test Route
 app.get('/', (req: Request, res: Response) => {
