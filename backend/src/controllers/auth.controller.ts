@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-// import { registerNewUser, loginUser } from '../services/auth.service'; // Crearemos esto en un momento para ser ordenados
 import UserModel from '../models/user.model';
 import { encrypt, verify } from '../utils/password.handle';
 import { generateToken } from '../utils/jwt.handle';
@@ -10,78 +9,65 @@ const registerCtrl = async (req: Request, res: Response) => {
     try {
         const { firstName, paternalSurname, maternalSurname, email, password, age, gender, phone } = req.body;
 
-        // 1. Verificar si el usuario ya existe
         const checkIs = await UserModel.findOne({ email });
-
-        // Generamos el código y encriptamos la contraseña desde antes para usarlos en ambos casos
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
         const passwordHash = await encrypt(password);
 
         if (checkIs) {
-            // CASO A: El usuario existe Y YA ESTÁ VERIFICADO
+            // CASO A: Usuario ya verificado
             if (checkIs.isVerified) {
                 return res.status(400).send({
                     success: false,
-                    message: 'EL_CORREO_YA_EXISTE',
-                    user: null
+                    code: 'AUTH_EMAIL_EXISTS',
+                    message: 'El correo ya existe'
                 });
             } 
             
-            // CASO B: El usuario existe PERO NO ESTÁ VERIFICADO (Tu caso)
-            // Solución: Actualizamos sus datos y le mandamos un código nuevo
+            // CASO B: Usuario pendiente (Reenviar código)
             await UserModel.updateOne({ email }, {
-                firstName,
-                paternalSurname,
-                maternalSurname,
-                password: passwordHash, // Actualizamos por si se equivocó en la pass anterior
-                age,
-                gender,
-                phone,
-                verificationCode // Guardamos el nuevo código
+                firstName, paternalSurname, maternalSurname,
+                password: passwordHash, age, gender, phone,
+                verificationCode
             });
 
-            // Reenviamos el correo
             await sendVerificationCode(email, verificationCode);
 
             return res.send({ 
                 success: true,
-                message: 'Usuario pendiente actualizado. Se ha reenviado el código.', 
+                code: 'AUTH_REGISTER_RESEND',
+                message: 'Código reenviado', 
                 user: checkIs 
             });
         }
 
-        // CASO C: El usuario NO existe (Usuario Nuevo)
-        // 2. Validar correo institucional (si aplica)
+        // CASO C: Usuario Nuevo
+        // Validar correo institucional (ACTIVADO)
         if (!email.endsWith('@ulsachihuahua.edu.mx')) { 
-             // return res.status(400).send('SOLO_CORREOS_INSTITUCIONALES');
+             return res.status(400).send({
+                success: false,
+                code: 'AUTH_INVALID_DOMAIN',
+                message: 'Solo correos institucionales'
+             });
         }
 
-        // 3. Crear el usuario nuevo
         const newUser = await UserModel.create({
-            firstName,
-            paternalSurname,
-            maternalSurname,
-            email,
-            password: passwordHash,
-            age,
-            gender,
-            phone,
-            verificationCode,
-            isVerified: false 
+            firstName, paternalSurname, maternalSurname, email,
+            password: passwordHash, age, gender, phone,
+            verificationCode, isVerified: false 
         });
 
-        // 4. Enviar correo
         await sendVerificationCode(email, verificationCode);
 
         res.send({ 
             success: true,
-            message: 'Usuario creado. Revisa tu correo para el código de verificación.', 
+            code: 'AUTH_REGISTER_SUCCESS',
+            message: 'Usuario creado. Revisa tu correo.', 
             user: newUser 
         });
 
     } catch (e) {
         console.log(e);
-        res.status(500).send('ERROR_REGISTER_USER');
+        res.status(500).send({ success: false, code: 'AUTH_REGISTER_ERROR' });
     }
 };
 
@@ -91,27 +77,25 @@ const loginCtrl = async (req: Request, res: Response) => {
         const { email, password } = req.body;
 
         const user = await UserModel.findOne({ email });
-        if (!user) return res.status(404).send('USUARIO_NO_ENCONTRADO');
+        if (!user) return res.status(404).send({ success: false, code: 'AUTH_USER_NOT_FOUND' });
 
-        if (!user.isVerified) return res.status(401).send('USUARIO_NO_VERIFICADO');
+        if (!user.isVerified) return res.status(401).send({ success: false, code: 'AUTH_NOT_VERIFIED' });
 
-        const passwordHash = user.password;
-        const isCorrect = await verify(password, passwordHash);
-
-        if (!isCorrect) return res.status(403).send('PASSWORD_INCORRECTA');
+        const isCorrect = await verify(password, user.password);
+        if (!isCorrect) return res.status(403).send({ success: false, code: 'AUTH_INCORRECT_PASSWORD' });
 
         const token = generateToken(user.id);
         
-        // Enviamos el token y los datos del usuario al frontend/app
         res.send({
-            success: true,         // Agregamos esto para ayudar al frontend
-            message: "Bienvenido", // Agregamos esto para mostrar en un Toast
+            success: true,
+            code: 'AUTH_LOGIN_SUCCESS',
+            message: "Bienvenido",
             token,
             user
         });
 
     } catch (e) {
-        res.status(500).send('ERROR_LOGIN_USER');
+        res.status(500).send({ success: false, code: 'AUTH_LOGIN_ERROR' });
     }
 };
 
@@ -121,18 +105,17 @@ const verifyCodeCtrl = async (req: Request, res: Response) => {
         const { email, code } = req.body;
         const user = await UserModel.findOne({ email });
 
-        if (!user) return res.status(404).send('USUARIO_NO_ENCONTRADO');
+        if (!user) return res.status(404).send({ success: false, code: 'AUTH_USER_NOT_FOUND' });
         
         if (user.verificationCode === code) {
-            // Actualizamos el usuario a verificado
             await UserModel.updateOne({ email }, { isVerified: true, verificationCode: '' });
-            res.json({ success: true, message: 'VERIFICACION_EXITOSA' });
+            res.json({ success: true, code: 'VERIFICACION_EXITOSA', message: 'Cuenta verificada' });
         } else {
-            res.status(400).send('CODIGO_INCORRECTO');
+            res.status(400).send({ success: false, code: 'AUTH_INCORRECT_CODE', message: 'Código incorrecto' });
         }
 
     } catch (e) {
-        res.status(500).send('ERROR_VERIFY_CODE');
+        res.status(500).send({ success: false, code: 'AUTH_VERIFY_ERROR' });
     }
 }
 
