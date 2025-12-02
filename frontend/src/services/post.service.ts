@@ -18,5 +18,14 @@ export const PostService = {
     create: async (formData: FormData): Promise<Post> => {
         const { data } = await api.post<Post>('/post', formData);
         return data;
-    }
+    },
+
+    update: async (id: string, formData: FormData): Promise<Post> => {
+        const { data } = await api.put<Post>(`/post/${id}`, formData);
+        return data;
+    },
+
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/post/${id}`);
+    }, 
 };

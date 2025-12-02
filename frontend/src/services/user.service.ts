@@ -2,12 +2,11 @@ import api from "./api";
 import type { Post } from "../types/post.interface";
 
 export const UserService = {
-    // Obtener mis guardados
-    getSavedPosts: async (): Promise<string[]> => {
-        // En tu backend, /api/user/saved devuelve los objetos completos.
-        // Para verificar rápido si está guardado, podemos mapear solo los IDs o usar la lista completa.
+    // Obtener mis guardados (OBJETOS COMPLETOS)
+    getSavedPosts: async (): Promise<Post[]> => {
         const { data } = await api.get<Post[]>('/user/saved');
-        return data.map(post => post._id);
+        // DEVOLVEMOS DATA DIRECTAMENTE (Arrays de Objetos), NO SOLO LOS IDS
+        return data; 
     },
 
     // Guardar/Quitar (Toggle)
