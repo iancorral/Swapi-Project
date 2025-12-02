@@ -51,7 +51,7 @@ export default function Login() {
             <input
               {...register("email", { required: "El correo es obligatorio" })}
               type="email"
-              placeholder="tu.correo@ulsa.edu.mx"
+              placeholder="tumatricula@ulsachihuahua.edu.mx"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
             />
             {errors.email && <span className="text-red-500 text-xs mt-1">{errors.email.message}</span>}

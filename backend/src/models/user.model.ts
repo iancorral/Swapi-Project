@@ -1,14 +1,14 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
-// 1. Interface: Define la estructura para TypeScript
+// 1. Interface: Los campos opcionales llevan '?'
 export interface IUser extends Document {
     firstName: string;
     paternalSurname: string;
-    maternalSurname: string;
+    maternalSurname?: string; // Opcional
     email: string;
     password: string;
-    age: number;
-    gender: string;
+    age?: number;    // Opcional
+    gender?: string; // Opcional
     phone: string;
     role: 'student' | 'admin';
     isVerified: boolean;
@@ -16,7 +16,7 @@ export interface IUser extends Document {
     savedPosts: Types.ObjectId[];
 }
 
-// 2. Schema: Define la estructura para MongoDB
+// 2. Schema: Quitamos 'required: true'
 const UserSchema: Schema = new Schema(
     {
         firstName: { 
@@ -31,7 +31,7 @@ const UserSchema: Schema = new Schema(
         },
         maternalSurname: { 
             type: String, 
-            required: true,
+            required: false, // YA NO ES OBLIGATORIO
             trim: true 
         },
         email: { 
@@ -47,11 +47,11 @@ const UserSchema: Schema = new Schema(
         },
         age: {
             type: Number,
-            required: true
+            required: false // YA NO ES OBLIGATORIO
         },
         gender: {
             type: String,
-            required: true
+            required: false // YA NO ES OBLIGATORIO
         },
         phone: {
             type: String,
@@ -69,7 +69,6 @@ const UserSchema: Schema = new Schema(
         verificationCode: { 
             type: String 
         },
-
         savedPosts: [
             {
                 type: Schema.Types.ObjectId,
@@ -83,7 +82,6 @@ const UserSchema: Schema = new Schema(
     }
 );
 
-// Índice para borrar usuarios no verificados (ej. códigos expiran)
 UserSchema.index(
     { createdAt: 1 },
     { 
@@ -92,5 +90,4 @@ UserSchema.index(
     }
 );
 
-// 3. Exportar el modelo
 export default mongoose.model<IUser>('User', UserSchema);
