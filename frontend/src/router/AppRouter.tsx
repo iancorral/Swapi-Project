@@ -10,6 +10,9 @@ import CreatePost from "../pages/post/CreatePost";
 
 import { useAuthStore } from "../context/auth.store";
 import { MainLayout } from "../components/layout/MainLayout";
+import CategoryFeed from '../pages/post/CategoryFeed';
+import Profile from '../pages/profile/Profile';
+import EditPost from '../pages/post/EditPost';
 
 /**
  * Ruta protegida
@@ -58,6 +61,39 @@ export const AppRouter = () => {
           <ProtectedRoute>
             <MainLayout>
               <CreatePost />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* CATEGORÍAS */}
+      <Route
+        path="/category/:type"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CategoryFeed />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Profile />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/edit-post/:id"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EditPost />
             </MainLayout>
           </ProtectedRoute>
         }

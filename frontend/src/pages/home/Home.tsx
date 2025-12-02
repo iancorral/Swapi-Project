@@ -1,60 +1,89 @@
 import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { PostService } from "../../services/post.service";
+import { UserService } from "../../services/user.service";
 import { ProductCard } from "../../components/ui/ProductCard";
 import type { Post } from "../../types/post.interface";
+import { useAuthStore } from "../../context/auth.store";
 
 export default function Home() {
+    const { t } = useTranslation();
+    const { user } = useAuthStore();
     const [posts, setPosts] = useState<Post[]>([]);
+    const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Cargar posts al iniciar
     useEffect(() => {
-        loadPosts();
+        loadData();
     }, []);
 
-    const loadPosts = async () => {
+    const loadData = async () => {
         try {
-            setLoading(true);
-            const data = await PostService.getAll();
-            setPosts(data);
+            const [postsData, savedData] = await Promise.all([
+                PostService.getAll(),
+                UserService.getSavedPosts()
+            ]);
+
+            setPosts(Array.isArray(postsData) ? postsData : []);
+            
+            if (Array.isArray(savedData)) {
+                setSavedPostIds(savedData.map((p: any) => p._id));
+            }
+
         } catch (error) {
-            console.error(error);
-            toast.error("No se pudieron cargar las publicaciones");
+            console.error("Error cargando home:", error);
         } finally {
             setLoading(false);
         }
     };
 
+    const categories = ['ventas', 'rentas', 'servicios', 'anuncios'];
+    const getPostsByCategory = (cat: string) => posts.filter(p => p.category.toLowerCase() === cat);
+
+    if (loading) return <div className="flex justify-center p-20"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div></div>;
+
     return (
+        // Se eliminó pb-20
         <div>
-            {/* Encabezado Simple */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Explora Swapi</h1>
-                <p className="text-gray-500 mt-1">El mercado exclusivo de tu universidad.</p>
+            <div className="mb-6 px-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    {t('home_welcome', { name: user?.firstName })} 
+                </h1>
             </div>
 
-            {/* Estado de Carga */}
-            {loading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                </div>
-            ) : (
-                // Grid de Productos
-                <>
-                    {posts.length === 0 ? (
-                        <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-                            <p className="text-gray-500 text-lg">No hay publicaciones disponibles.</p>
+            {/* CATEGORÍAS */}
+            {categories.map((category) => {
+                const categoryPosts = getPostsByCategory(category);
+                if (categoryPosts.length === 0) return null;
+
+                return (
+                    <div key={category} className="mb-6">
+                        <div className="flex justify-between items-end mb-3 px-2">
+                            <h2 className="text-xl font-bold capitalize text-gray-800 flex items-center gap-2">
+                                {t(`${category}`)}
+                                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-normal">
+                                    {categoryPosts.length}
+                                </span>
+                            </h2>
+                            <Link to={`/category/${category}`} className="text-primary font-medium hover:underline text-sm">
+                                {t('see_more')}
+                            </Link>
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {posts.map((post) => (
-                                <ProductCard key={post._id} product={post} />
+
+                        <div className="flex overflow-x-auto pb-4 gap-3 px-2 scrollbar-hide snap-x">
+                            {categoryPosts.slice(0, 6).map((post) => (
+                                <div key={post._id} className="min-w-[260px] snap-center">
+                                    <ProductCard 
+                                        product={post} 
+                                        isSavedInitial={savedPostIds.includes(post._id)}
+                                    />
+                                </div>
                             ))}
                         </div>
-                    )}
-                </>
-            )}
+                    </div>
+                );
+            })}
         </div>
     );
 }

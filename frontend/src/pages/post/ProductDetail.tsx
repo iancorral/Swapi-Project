@@ -32,19 +32,27 @@ export default function ProductDetail() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // Cargar Post y Lista de Guardados en paralelo (más rápido)
-      const [postData, savedIds] = await Promise.all([
+      
+      // Cargar Post y Lista de Guardados en paralelo
+      const [postData, savedPosts] = await Promise.all([
         PostService.getOne(id!),
         UserService.getSavedPosts()
       ]);
       
       setPost(postData);
-      // Verificamos si este post está en mis guardados
-      setIsSaved(savedIds.includes(postData._id));
+
+      // --- CORRECCIÓN AQUÍ ---
+      // savedPosts ahora devuelve objetos completos, no solo IDs.
+      // Usamos .some() para buscar si algún post guardado tiene el mismo ID que el actual.
+      if (Array.isArray(savedPosts)) {
+          const isInFavorites = savedPosts.some((saved: any) => saved._id === postData._id);
+          setIsSaved(isInFavorites);
+      }
       
     } catch (error) {
+      console.error(error);
       toast.error("Error al cargar la publicación");
-      navigate("/"); // Si falla, regresamos al home
+      navigate("/"); 
     } finally {
       setLoading(false);
     }
@@ -55,14 +63,21 @@ export default function ProductDetail() {
     if (!post || saving) return;
     try {
       setSaving(true);
-      // Optimistic UI: Cambiamos el icono antes de que responda el server (se siente más rápido)
+      // Optimistic UI
       setIsSaved(!isSaved); 
       
       const response = await UserService.toggleSave(post._id);
       
       // Confirmamos con el estado real del server
-      setIsSaved(response.saved);
-      toast.success(response.saved ? "Guardado en favoritos" : "Eliminado de favoritos");
+      // Nota: Asegúrate de que tu backend devuelva { saved: true/false }
+      // Si tu backend no devuelve eso, mantén el estado optimista.
+      if (response && typeof response.saved === 'boolean') {
+          setIsSaved(response.saved);
+          toast.success(response.saved ? "Guardado en favoritos" : "Eliminado de favoritos");
+      } else {
+          // Fallback si el backend no devuelve estructura exacta
+           toast.success(isSaved ? "Eliminado de favoritos" : "Guardado en favoritos");
+      }
       
     } catch (error) {
       setIsSaved(!isSaved); // Revertimos si falló
@@ -75,9 +90,14 @@ export default function ProductDetail() {
   // 3. Acción de WhatsApp
   const handleWhatsApp = () => {
     if (!post) return;
-    const author = post.author as User;
-    const phone = author.phone;
-    if (!phone) return toast.error("El vendedor no tiene teléfono registrado");
+    // Validación segura del autor
+    const author = post.author as User | undefined;
+    const phone = author?.phone;
+    
+    // Si no hay teléfono, mostramos aviso (o podrías no mostrar el botón)
+    if (!phone) {
+        return toast.error("El vendedor no tiene teléfono público registrado");
+    }
 
     const message = `Hola, vi tu publicación "${post.title}" en Swapi y me interesa.`;
     const url = `https://wa.me/52${phone}?text=${encodeURIComponent(message)}`;
@@ -88,12 +108,18 @@ export default function ProductDetail() {
   if (!post) return null;
 
   const author = post.author as User;
+  
+  // Lógica de imagen segura
   const BASE_URL = "http://localhost:3000/storage/";
-  const imageUrl = post.images.length > 0 ? `${BASE_URL}${post.images[0]}` : "https://via.placeholder.com/600x400";
-  const avatarHex = getAvatarColor(author.firstName);
+  const getImageUrl = (img?: string) => {
+      if(!img) return "https://via.placeholder.com/600x400?text=Sin+Imagen";
+      return img.startsWith('http') ? img : `${BASE_URL}${img}`;
+  }
+  const imageUrl = post.images.length > 0 ? getImageUrl(post.images[0]) : getImageUrl();
+  const avatarHex = getAvatarColor(author?.firstName || 'U');
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
+    <div className="max-w-6xl mx-auto p-4 pb-20">
       {/* Botón Regresar */}
       <button onClick={() => navigate(-1)} className="mb-6 flex items-center text-gray-500 hover:text-primary transition font-medium">
         <ArrowBackIcon className="mr-1" /> Regresar
@@ -102,11 +128,12 @@ export default function ProductDetail() {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row">
         
         {/* COLUMNA IZQUIERDA: IMAGEN */}
-        <div className="md:w-1/2 bg-gray-100 relative h-96 md:h-auto">
+        <div className="md:w-1/2 bg-gray-100 relative h-96 md:h-auto flex items-center justify-center">
           <img 
             src={imageUrl} 
             alt={post.title} 
             className="w-full h-full object-cover"
+            onError={(e) => (e.currentTarget.src = "https://via.placeholder.com/600x400?text=Error+Carga")}
           />
         </div>
 
@@ -121,6 +148,7 @@ export default function ProductDetail() {
             <button 
               onClick={handleToggleSave}
               className="text-gray-400 hover:text-primary transition p-2 rounded-full hover:bg-gray-50"
+              title={isSaved ? "Quitar de favoritos" : "Guardar en favoritos"}
             >
               {isSaved ? <BookmarkIcon className="text-primary" fontSize="large" /> : <BookmarkBorderIcon fontSize="large" />}
             </button>
@@ -129,7 +157,7 @@ export default function ProductDetail() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">{post.title}</h1>
           <p className="text-4xl font-extrabold text-primary mb-6">${post.price.toLocaleString('es-MX')}</p>
 
-          {/* Ubicación Fake (Estilo App) */}
+          {/* Ubicación Fake */}
           <div className="flex items-center text-gray-500 text-sm mb-8">
             <LocationOnIcon fontSize="small" className="mr-1" />
             <span>Chihuahua, Chih. (Comunidad ULSA)</span>
@@ -149,10 +177,10 @@ export default function ProductDetail() {
                   className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm"
                   style={{ backgroundColor: avatarHex }}
                 >
-                  {author.firstName.charAt(0)}
+                  {author?.firstName?.charAt(0) || 'U'}
                 </div>
                 <div>
-                  <p className="text-gray-900 font-bold">{author.firstName} {author.paternalSurname}</p>
+                  <p className="text-gray-900 font-bold">{author?.firstName} {author?.paternalSurname}</p>
                   <p className="text-xs text-gray-500 uppercase">Miembro Verificado</p>
                 </div>
               </div>
