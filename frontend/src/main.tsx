@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AppRouter } from './router/AppRouter'
-import './index.css' // <--- ¡ESTA LÍNEA ES LA MAGIA!
+import './assets/styles/global.css' 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

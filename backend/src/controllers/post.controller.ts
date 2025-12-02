@@ -13,7 +13,7 @@ const Filter = badWordsRaw.default || badWordsRaw.Filter || badWordsRaw;
 
 // 3. Verificamos (Debug de seguridad)
 if (typeof Filter !== 'function') {
-    console.error('⚠️ ERROR CRÍTICO: No se encontró la clase Filter de bad-words.');
+    console.error('ERROR CRÍTICO: No se encontró la clase Filter de bad-words.');
     console.error('Contenido recibido:', badWordsRaw);
 }
 

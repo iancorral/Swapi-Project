@@ -13,5 +13,11 @@ export const AuthService = {
     register: async (userData: RegisterRequest): Promise<AuthResponse> => {
         const { data } = await api.post<AuthResponse>('/auth/register', userData);
         return data;
+
+    },
+    verifyCode: async (email: string, code: string): Promise<any> => {
+        // Hacemos POST a /auth/verify con el cuerpo que espera tu backend
+        const { data } = await api.post('/auth/verify', { email, code });
+        return data;
     }
 };
