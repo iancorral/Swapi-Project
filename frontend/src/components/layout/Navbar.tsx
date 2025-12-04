@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../context/auth.store";
 import { toast } from "react-hot-toast";
+import Logo from "../../assets/images/Logo.png"; // Importamos el logo
 
 // Íconos Material UI
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -24,6 +25,8 @@ export const Navbar = () => {
           {/* LOGO */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center gap-2">
+              {/* Aquí agregamos la imagen del logo */}
+              <img src={Logo} alt="Swapi Logo" className="h-10 w-auto" />
               <span className="text-2xl font-extrabold text-primary tracking-tight">
                 Swapi
               </span>

@@ -8,87 +8,93 @@ interface Props {
     isSavedInitial?: boolean;
 }
 
-export const ProductCard = ({ product, isSavedInitial }: Props) => {
+export const ProductCard = ({ product }: Props) => {
     const navigate = useNavigate();
 
-    // LÓGICA DE IMAGEN MEJORADA
-    // Asegúrate que este puerto (3000, 4000, 8000) sea el de tu BACKEND, no el del frontend.
-    const BACKEND_URL = "http://localhost:3000"; 
-    
+    const BACKEND_URL = "http://localhost:3000";
+
     const getImageUrl = (imagePath?: string) => {
-        if (!imagePath) return "https://via.placeholder.com/400x300?text=Sin+Imagen";
-        
-        // Si la imagen ya tiene http (viene de internet/cloudinary), úsala directo
-        if (imagePath.startsWith('http')) return imagePath;
-        
-        // Si es una imagen local, pégale la ruta del storage
-        // Ajusta '/storage/' si tu backend las sirve en '/uploads/' o '/public/'
+        if (!imagePath) {
+            return "https://via.placeholder.com/400x300?text=Sin+Imagen";
+        }
+        if (imagePath.startsWith("http")) return imagePath;
         return `${BACKEND_URL}/storage/${imagePath}`;
     };
 
-    const imageUrl = product.images.length > 0 
-        ? getImageUrl(product.images[0]) 
-        : getImageUrl();
+    const imageUrl =
+        product.images.length > 0
+            ? getImageUrl(product.images[0])
+            : getImageUrl();
 
-    // Manejo seguro del autor (por si viene null)
     const author = product.author as User | undefined;
     const firstName = author?.firstName || "Usuario";
-    const lastName = author?.paternalSurname || "La Salle";
+    const lastName = author?.paternalSurname || "";
 
-    const firstInitial = firstName.charAt(0).toUpperCase();
-    const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : "";
-    const initials = `${firstInitial}${lastInitial}`;
+    const initials =
+        firstName.charAt(0).toUpperCase() +
+        (lastName ? lastName.charAt(0).toUpperCase() : "");
+
     const avatarHex = getAvatarColor(firstName);
 
     return (
         <div
             onClick={() => navigate(`/post/${product._id}`)}
-            className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full overflow-hidden cursor-pointer"
+            className="
+                group bg-white rounded-2xl border border-gray-100
+                shadow-sm hover:shadow-lg transition-all
+                overflow-hidden cursor-pointer flex flex-col
+            "
         >
-            {/* --- IMAGEN --- */}
-            <div className="relative h-48 sm:h-56 overflow-hidden bg-gray-100">
+            {/* IMAGEN */}
+            <div className="relative w-full aspect-[4/3] bg-gray-200 overflow-hidden">
                 <img
                     src={imageUrl}
                     alt={product.title}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                    // Esto ayuda si la imagen falla al cargar, pone una por defecto
-                    onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x300?text=Error+Carga";
-                    }}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) =>
+                        (e.currentTarget.src =
+                            "https://via.placeholder.com/400x300?text=Sin+Imagen")
+                    }
                 />
 
-                <div className="absolute top-3 left-3">
-                    <span className="bg-white/95 backdrop-blur-md text-gray-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm border border-gray-100">
-                        {product.category}
-                    </span>
-                </div>
+                <span className="
+                    absolute top-3 left-3 bg-white/90 backdrop-blur
+                    text-gray-800 text-[10px] font-bold
+                    px-3 py-1 rounded-full uppercase tracking-wide
+                    border border-gray-100
+                ">
+                    {product.category}
+                </span>
             </div>
 
-            {/* --- CONTENIDO --- */}
+            {/* TEXTO */}
             <div className="p-4 flex flex-col flex-grow">
-                <div className="mb-4">
-                    <p className="text-xl font-extrabold text-primary mb-1">
-                        ${product.price.toLocaleString('es-MX')}
-                    </p>
-                    <h3 className="text-gray-900 font-semibold text-base leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                        {product.title}
-                    </h3>
-                </div>
+                <p className="text-lg font-extrabold text-primary mb-1">
+                    ${product.price.toLocaleString("es-MX")}
+                </p>
 
-                {/* --- FOOTER --- */}
+                <h3 className="
+                    text-gray-900 font-semibold text-sm
+                    line-clamp-2 h-[2.5rem]
+                    group-hover:text-primary transition-colors
+                ">
+                    {product.title}
+                </h3>
+
+                {/* AUTOR */}
                 <div className="mt-auto pt-3 border-t border-gray-50 flex items-center gap-3">
                     <div
-                        className="w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-white"
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold"
                         style={{ backgroundColor: avatarHex }}
                     >
                         {initials}
                     </div>
 
-                    <div className="flex flex-col">
-                        <span className="text-sm text-gray-700 font-bold leading-tight truncate max-w-[120px]">
+                    <div className="truncate">
+                        <p className="text-sm font-bold text-gray-700 truncate">
                             {firstName} {lastName}
-                        </span>
-                        <span className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
+                        </p>
+                        <span className="text-[10px] text-gray-400 uppercase">
                             Vendedor
                         </span>
                     </div>

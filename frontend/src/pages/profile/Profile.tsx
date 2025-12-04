@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-// 1. IMPORTAR useNavigate
-import { Link, useNavigate } from "react-router-dom";
+// 1. IMPORTAR useSearchParams además de useNavigate
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../../context/auth.store";
 import { PostService } from "../../services/post.service";
 import { UserService } from "../../services/user.service";
@@ -10,16 +10,24 @@ import { toast } from "react-hot-toast";
 
 export default function Profile() {
     const { user } = useAuthStore();
-    // 2. INICIALIZAR HOOK
     const navigate = useNavigate();
     
-    const [activeTab, setActiveTab] = useState<'my_posts' | 'saved'>('my_posts');
+    // --- CORRECCIÓN TABS: Usar URL params ---
+    const [searchParams, setSearchParams] = useSearchParams();
+    
+    // Si no hay tab en la URL, asumimos 'my_posts'
+    const activeTab = searchParams.get('tab') || 'my_posts';
+
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         loadData();
-    }, [activeTab]);
+    }, [activeTab]); // Se recarga cuando cambia la URL
+
+    const handleTabChange = (tab: string) => {
+        setSearchParams({ tab }); // Esto actualiza la URL y guarda historial
+    };
 
     const loadData = async () => {
         setLoading(true);
@@ -106,7 +114,7 @@ export default function Profile() {
                     className={`pb-2 px-4 font-medium whitespace-nowrap transition-colors ${
                         activeTab === 'my_posts' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'
                     }`}
-                    onClick={() => setActiveTab('my_posts')}
+                    onClick={() => handleTabChange('my_posts')}
                 >
                     Mis Publicaciones
                 </button>
@@ -114,7 +122,7 @@ export default function Profile() {
                     className={`pb-2 px-4 font-medium whitespace-nowrap transition-colors ${
                         activeTab === 'saved' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'
                     }`}
-                    onClick={() => setActiveTab('saved')}
+                    onClick={() => handleTabChange('saved')}
                 >
                     Guardados
                 </button>
@@ -163,13 +171,12 @@ export default function Profile() {
                                             </svg>
                                         </button>
 
-                                         {/* Botón Editar - YA FUNCIONANDO */}
+                                         {/* Botón Editar */}
                                          <button 
                                             className="bg-white/90 p-2 rounded-full shadow-md hover:bg-blue-50 text-blue-600 transition-transform hover:scale-110"
                                             title="Editar"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                // 3. NAVEGACIÓN REAL
                                                 navigate(`/edit-post/${post._id}`);
                                             }}
                                         >
@@ -185,8 +192,8 @@ export default function Profile() {
                 </>
             )}
             
-                    {/* Confirm modal */}
-                    <ConfirmModal open={confirmOpen} message={confirmMessage} onConfirm={onConfirm} onCancel={onCancel} />
+            {/* Confirm modal */}
+            <ConfirmModal open={confirmOpen} message={confirmMessage} onConfirm={onConfirm} onCancel={onCancel} />
         </div>
     );
 }
