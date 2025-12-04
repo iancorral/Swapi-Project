@@ -13,6 +13,7 @@ import { MainLayout } from "../components/layout/MainLayout";
 import CategoryFeed from '../pages/post/CategoryFeed';
 import Profile from '../pages/profile/Profile';
 import EditPost from '../pages/post/EditPost';
+import { Dashboard } from '../pages/admin/Dashboard';
 
 /**
  * Ruta protegida
@@ -99,6 +100,17 @@ export const AppRouter = () => {
         }
       />
 
+        <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      
       {/* ---------- FALLBACK ---------- */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

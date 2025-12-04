@@ -9,6 +9,7 @@ import connectDB from './config/db';
 import { router as authRouter } from './routes/auth';
 import { router as postRouter } from './routes/post';
 import { router as userStats } from "./routes/user";
+import { router as analyticsRouter } from './routes/analytics';
 
 // Ya no necesitas llamar a dotenv.config() aquí abajo, la línea 1 ya lo hizo.
 
@@ -39,6 +40,8 @@ app.get('/', (req: Request, res: Response) => {
         version: '1.0.0'
     });
 });
+
+app.use("/api/analytics", analyticsRouter);
 
 // Start Server
 app.listen(port, () => {
