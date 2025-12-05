@@ -19,10 +19,6 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// ADELANTE LA QUITAREMOS
-const storagePath = path.join(process.cwd(), 'storage');
-app.use('/storage', express.static(storagePath));
-
 // Rutas
 app.use('/api/auth', authRouter);
 app.use('/api/post', postRouter);

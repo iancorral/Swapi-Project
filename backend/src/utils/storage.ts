@@ -1,18 +1,23 @@
 import { Request } from 'express';
-import multer, { diskStorage } from 'multer';
+import multer from 'multer';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
-// CONFIGURACIÓN DE ALMACENAMIENTO LOCAL
-const PATH_STORAGE = `${process.cwd()}/storage`;
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-const storage = diskStorage({
-    destination(req: Request, file: Express.Multer.File, cb: any) {
-        cb(null, PATH_STORAGE);
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+        return {
+            folder: 'swapi-uploads', 
+            format: 'png',
+            public_id: `image-${Date.now()}` 
+        };
     },
-    filename(req: Request, file: Express.Multer.File, cb: any) {
-        const ext = file.originalname.split('.').pop(); 
-        const fileNameRandom = `image-${Date.now()}.${ext}`;
-        cb(null, fileNameRandom);
-    }
 });
 
 const multerMiddleware = multer({ storage });
