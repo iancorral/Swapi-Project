@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-// 1. IMPORTAR useSearchParams además de useNavigate
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../../context/auth.store";
 import { PostService } from "../../services/post.service";
@@ -12,10 +11,8 @@ export default function Profile() {
     const { user } = useAuthStore();
     const navigate = useNavigate();
     
-    // --- CORRECCIÓN TABS: Usar URL params ---
     const [searchParams, setSearchParams] = useSearchParams();
-    
-    // Si no hay tab en la URL, asumimos 'my_posts'
+
     const activeTab = searchParams.get('tab') || 'my_posts';
 
     const [items, setItems] = useState<any[]>([]);
@@ -23,10 +20,10 @@ export default function Profile() {
 
     useEffect(() => {
         loadData();
-    }, [activeTab]); // Se recarga cuando cambia la URL
+    }, [activeTab]); 
 
     const handleTabChange = (tab: string) => {
-        setSearchParams({ tab }); // Esto actualiza la URL y guarda historial
+        setSearchParams({ tab }); 
     };
 
     const loadData = async () => {
@@ -68,7 +65,6 @@ export default function Profile() {
         }
     };
 
-    // Modal confirm (centered)
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [confirmMessage, setConfirmMessage] = useState('');
     const confirmResolve = useRef<((value: boolean) => void) | null>(null);

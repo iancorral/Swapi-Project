@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// ... resto de imports iguales ...
 import { toast } from "react-hot-toast";
 import { PostService } from "../../services/post.service";
 import { UserService } from "../../services/user.service";
@@ -26,14 +25,12 @@ export default function ProductDetail() {
   useEffect(() => {
     if (!id) return;
     
-    // --- CORRECCIÓN SCROLL: Ir arriba al cargar ---
     window.scrollTo(0, 0);
     
     loadData();
   }, [id]);
 
-  // ... resto del código (loadData, handleToggleSave, etc.) se queda igual ...
-  const loadData = async () => { /* ... lo que ya tenías ... */ 
+  const loadData = async () => { 
     try {
       setLoading(true);
       const [postData, savedPosts] = await Promise.all([
@@ -54,7 +51,7 @@ export default function ProductDetail() {
     }
   };
 
-  const handleToggleSave = async () => { /* ... igual ... */ 
+  const handleToggleSave = async () => { 
     if (!post || saving) return;
     try {
       setSaving(true);
@@ -74,7 +71,7 @@ export default function ProductDetail() {
     }
   };
 
-  const handleWhatsApp = () => { /* ... igual ... */ 
+  const handleWhatsApp = () => { 
     if (!post) return;
     const author = post.author as User | undefined;
     const phone = author?.phone;

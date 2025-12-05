@@ -1,4 +1,3 @@
-// Colores en HEX (Más seguro para avatares dinámicos)
 const colors = [
   "#EF4444", // Rojo
   "#F97316", // Naranja
@@ -13,7 +12,7 @@ const colors = [
 ];
 
 export const getAvatarColor = (name: string): string => {
-  if (!name) return "#9CA3AF"; // Gris por defecto
+  if (!name) return "#9CA3AF"; 
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);

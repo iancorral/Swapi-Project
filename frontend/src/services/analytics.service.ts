@@ -10,11 +10,17 @@ export interface DashboardStats {
   charts: {
     postsByCategory: { name: string; value: number }[];
     userSegments: { name: string; value: number }[];
+
+    topSellersList?: { 
+        name: string;
+        email: string;
+        posts: number;
+        totalValue: number;
+    }[];
   };
 }
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   const { data } = await api.get('/analytics/dashboard'); 
-  // Asegúrate que tu ruta en backend sea /analytics/dashboard o ajusta aquí
   return data;
 };

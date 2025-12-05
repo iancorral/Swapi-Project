@@ -45,7 +45,6 @@ export const ProductCard = ({ product }: Props) => {
                 overflow-hidden cursor-pointer flex flex-col
             "
         >
-            {/* IMAGEN */}
             <div className="relative w-full aspect-[4/3] bg-gray-200 overflow-hidden">
                 <img
                     src={imageUrl}
@@ -67,7 +66,6 @@ export const ProductCard = ({ product }: Props) => {
                 </span>
             </div>
 
-            {/* TEXTO */}
             <div className="p-4 flex flex-col flex-grow">
                 <p className="text-lg font-extrabold text-primary mb-1">
                     ${product.price.toLocaleString("es-MX")}
@@ -81,7 +79,6 @@ export const ProductCard = ({ product }: Props) => {
                     {product.title}
                 </h3>
 
-                {/* AUTOR */}
                 <div className="mt-auto pt-3 border-t border-gray-50 flex items-center gap-3">
                     <div
                         className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold"
@@ -95,7 +92,7 @@ export const ProductCard = ({ product }: Props) => {
                             {firstName} {lastName}
                         </p>
                         <span className="text-[10px] text-gray-400 uppercase">
-                            Vendedor
+                            Usuario
                         </span>
                     </div>
                 </div>

@@ -10,10 +10,8 @@ const checkJwt = (req: RequestExt, res: Response, next: NextFunction) => {
     try {
         const jwtNu = req.headers.authorization || '';
         
-        // CORRECCIÓN AQUÍ: Separamos 'const' de 'jwt'
         const jwt = jwtNu.split(' ').pop(); 
-
-        // Usamos la variable 'jwt' que acabamos de crear
+        
         const isUser = verifyToken(`${jwt}`);
 
         if (!isUser) {

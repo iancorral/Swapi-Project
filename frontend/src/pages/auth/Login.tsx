@@ -22,11 +22,10 @@ export default function Login() {
       
       // 3. Feedback y redirección
       toast.success(`¡Bienvenido, ${response.user.firstName}!`);
-      navigate("/"); // Nos manda al Home (que crearemos luego)
+      navigate("/");
       
     } catch (error: any) {
       console.error(error);
-      // Mostramos el error que venga del backend o uno genérico
       const msg = error.response?.data?.message || "Error al iniciar sesión";
       toast.error(msg);
     }

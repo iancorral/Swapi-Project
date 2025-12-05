@@ -16,12 +16,22 @@ export const PostService = {
     },
 
     create: async (formData: FormData): Promise<Post> => {
-        const { data } = await api.post<Post>('/post', formData);
+        // TRUCO: Ponemos 'undefined' para que el navegador genere 
+        // automáticamente el 'boundary' correcto.
+        const { data } = await api.post<Post>('/post', formData, {
+            headers: {
+                "Content-Type": undefined, 
+            }
+        });
         return data;
     },
 
     update: async (id: string, formData: FormData): Promise<Post> => {
-        const { data } = await api.put<Post>(`/post/${id}`, formData);
+        const { data } = await api.put<Post>(`/post/${id}`, formData, {
+            headers: {
+                "Content-Type": undefined,
+            }
+        });
         return data;
     },
 

@@ -4,7 +4,6 @@ import { getDashboardStats } from '../controllers/analytics.controller';
 
 const router = Router();
 
-// Solo usuarios logueados pueden ver el dashboard (Seguridad básica)
 router.get('/dashboard', checkJwt, getDashboardStats);
 
 export { router };

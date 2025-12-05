@@ -20,7 +20,7 @@ interface EditPostForm {
 }
 
 export default function EditPost() {
-  const { id } = useParams(); // Obtenemos el ID de la URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
   const [preview, setPreview] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
@@ -29,7 +29,7 @@ export default function EditPost() {
     register,
     handleSubmit,
     watch,
-    reset, // Necesario para rellenar el formulario
+    reset, 
     formState: { errors, isSubmitting }
   } = useForm<EditPostForm>();
 
@@ -43,7 +43,6 @@ export default function EditPost() {
       if (!id) return;
       const post = await PostService.getOne(id);
       
-      // Rellenamos los inputs de texto
       reset({
         title: post.title,
         description: post.description,
@@ -51,10 +50,8 @@ export default function EditPost() {
         category: post.category,
       });
 
-      // Configuramos la previsualización de la imagen existente
       if (post.images && post.images.length > 0) {
         const img = post.images[0];
-        // Ajusta la URL base según tu backend
         const fullUrl = img.startsWith('http') ? img : `http://localhost:3000/storage/${img}`;
         setPreview(fullUrl);
       }
@@ -62,13 +59,12 @@ export default function EditPost() {
     } catch (error) {
       console.error(error);
       toast.error("No se pudo cargar la publicación");
-      navigate("/profile"); // O donde prefieras redirigir si falla
+      navigate("/profile");
     } finally {
       setLoadingData(false);
     }
   };
 
-  // 2. Lógica para cambiar la imagen (igual que en Create)
   const imageFiles = watch("image");
   useEffect(() => {
     if (imageFiles && imageFiles.length > 0) {
@@ -79,7 +75,6 @@ export default function EditPost() {
     }
   }, [imageFiles]);
 
-  // 3. Enviar actualización
   const onSubmit = async (data: EditPostForm) => {
     if (!id) return;
 
@@ -90,16 +85,14 @@ export default function EditPost() {
       formData.append("price", data.price.toString());
       formData.append("category", data.category);
 
-      // Solo enviamos imagen si el usuario seleccionó una nueva
       if (data.image && data.image.length > 0) {
         formData.append("image", data.image[0]);
       }
 
-      // Asumimos que tienes un método update en tu servicio
       await PostService.update(id, formData);
 
       toast.success("¡Publicación actualizada!");
-      navigate(`/post/${id}`); // Redirigir al detalle del post
+      navigate(`/post/${id}`);
     } catch (error: any) {
       console.error(error);
       const msg = error.response?.data?.message || "Error al actualizar";
@@ -228,7 +221,7 @@ export default function EditPost() {
                 </div>
               ) : (
                 <div className="py-8 text-center">
-                   {/* Esto solo se muestra si el post original NO tenía foto y el usuario la borró, caso raro */}
+                   {/* Esto solo se muestra si el post original NO tenía foto y el usuario la borró */}
                   <div className="bg-white p-3 rounded-full shadow-sm inline-block mb-3">
                     <AddPhotoAlternateIcon className="text-primary" fontSize="large" />
                   </div>
