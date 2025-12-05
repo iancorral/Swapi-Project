@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getDashboardStats, type DashboardStats } from '../../services/analytics.service';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -119,7 +119,8 @@ export const Dashboard = () => {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {stats.charts.userSegments.map((entry: any, index: number) => (
+                    {/* AQUÍ ESTABA EL ERROR: Cambié 'entry' por '_' */}
+                    {stats.charts.userSegments.map((_: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                     ))}
                   </Pie>
@@ -136,14 +137,12 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* --- SECCIÓN 3: TABLA DE TOP VENDEDORES (NUEVO) --- */}
+        {/* --- SECCIÓN 3: TABLA DE TOP VENDEDORES --- */}
         {stats.charts.topSellersList && stats.charts.topSellersList.length > 0 && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                     <div>
                         <h2 className="text-lg font-bold text-gray-800">🏆 Top 5 Vendedores</h2>
-                        <p className="text-sm text-gray-400 mt-1">
-                        </p>
                     </div>
                     <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-100">
                         Live Data
