@@ -18,11 +18,29 @@ import { useAuthStore } from "../context/auth.store";
 import { MainLayout } from "../components/layout/MainLayout";
 
 /**
- * Ruta protegida
+ * Ruta protegida estándar (Solo requiere estar logueado)
  */
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+/**
+ * Ruta protegida VIP (Requiere estar logueado Y ser admin).
+ */
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, user } = useAuthStore();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // AQUÍ ESTÁ EL TRUCO: Verificamos el rol
+  if (user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 export const AppRouter = () => {
@@ -33,7 +51,7 @@ export const AppRouter = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/verify" element={<VerifyCode />} />
 
-      {/* ---------- RUTAS PRIVADAS ---------- */}
+      {/* ---------- RUTAS PRIVADAS (Cualquier usuario) ---------- */}
       <Route
         path="/"
         element={
@@ -45,7 +63,6 @@ export const AppRouter = () => {
         }
       />
 
-      {/* DETALLE DE POST */}
       <Route
         path="/post/:id"
         element={
@@ -57,7 +74,6 @@ export const AppRouter = () => {
         }
       />
 
-      {/* CREAR POST */}
       <Route
         path="/create-post"
         element={
@@ -69,7 +85,6 @@ export const AppRouter = () => {
         }
       />
 
-      {/* CATEGORÍAS */}
       <Route
         path="/category/:type"
         element={
@@ -102,14 +117,15 @@ export const AppRouter = () => {
         }
       />
 
+      {/* ---------- RUTA DE ADMIN (Protegida x2) ---------- */}
       <Route
         path="/admin/dashboard"
         element={
-          <ProtectedRoute>
+          <AdminRoute> {/* <--- CAMBIO AQUÍ: Usamos AdminRoute en vez de ProtectedRoute */}
             <MainLayout>
               <Dashboard />
             </MainLayout>
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
       
