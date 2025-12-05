@@ -1,14 +1,13 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
-// 1. Interface: Los campos opcionales llevan '?'
 export interface IUser extends Document {
     firstName: string;
     paternalSurname: string;
-    maternalSurname?: string; // Opcional
+    maternalSurname?: string; 
     email: string;
     password: string;
-    age?: number;    // Opcional
-    gender?: string; // Opcional
+    age?: number;   
+    gender?: string; 
     phone: string;
     role: 'student' | 'admin';
     isVerified: boolean;
@@ -16,7 +15,6 @@ export interface IUser extends Document {
     savedPosts: Types.ObjectId[];
 }
 
-// 2. Schema: Quitamos 'required: true'
 const UserSchema: Schema = new Schema(
     {
         firstName: { 
@@ -31,7 +29,7 @@ const UserSchema: Schema = new Schema(
         },
         maternalSurname: { 
             type: String, 
-            required: false, // YA NO ES OBLIGATORIO
+            required: false, 
             trim: true 
         },
         email: { 
@@ -47,11 +45,11 @@ const UserSchema: Schema = new Schema(
         },
         age: {
             type: Number,
-            required: false // YA NO ES OBLIGATORIO
+            required: false 
         },
         gender: {
             type: String,
-            required: false // YA NO ES OBLIGATORIO
+            required: false 
         },
         phone: {
             type: String,

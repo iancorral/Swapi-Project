@@ -1,10 +1,10 @@
-import api from "./api"; // Importamos la instancia de Axios que configuramos antes
+import api from "./api"; 
 import type { LoginRequest, RegisterRequest, AuthResponse } from "../types/auth.interface";
 
 export const AuthService = {
     // Función para Iniciar Sesión
     login: async (credentials: LoginRequest): Promise<AuthResponse> => {
-        // Axios ya devuelve la respuesta en 'data', y le decimos que esperamos un AuthResponse
+
         const { data } = await api.post<AuthResponse>('/auth/login', credentials);
         return data;
     },
@@ -16,7 +16,7 @@ export const AuthService = {
 
     },
     verifyCode: async (email: string, code: string): Promise<any> => {
-        // Hacemos POST a /auth/verify con el cuerpo que espera tu backend
+
         const { data } = await api.post('/auth/verify', { email, code });
         return data;
     }

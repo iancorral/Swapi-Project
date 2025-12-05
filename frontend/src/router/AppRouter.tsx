@@ -7,13 +7,15 @@ import VerifyCode from "../pages/auth/VerifyCode";
 import Home from "../pages/home/Home";
 import ProductDetail from "../pages/post/ProductDetail";
 import CreatePost from "../pages/post/CreatePost";
-
-import { useAuthStore } from "../context/auth.store";
-import { MainLayout } from "../components/layout/MainLayout";
 import CategoryFeed from '../pages/post/CategoryFeed';
 import Profile from '../pages/profile/Profile';
 import EditPost from '../pages/post/EditPost';
 import { Dashboard } from '../pages/admin/Dashboard';
+
+import NotFound from "../pages/error/NotFound";
+
+import { useAuthStore } from "../context/auth.store";
+import { MainLayout } from "../components/layout/MainLayout";
 
 /**
  * Ruta protegida
@@ -100,7 +102,7 @@ export const AppRouter = () => {
         }
       />
 
-        <Route
+      <Route
         path="/admin/dashboard"
         element={
           <ProtectedRoute>
@@ -111,8 +113,9 @@ export const AppRouter = () => {
         }
       />
       
-      {/* ---------- FALLBACK ---------- */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* ---------- FALLBACK (ERROR 404) ---------- */}
+      <Route path="*" element={<NotFound />} />
+      
     </Routes>
   );
 };

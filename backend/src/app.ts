@@ -1,7 +1,5 @@
-// 1. IMPORTACIÓN DIRECTA (Esto fuerza la carga inmediata)
 import 'dotenv/config'; 
 
-// 2. AHORA EL RESTO DE IMPORTS
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -10,8 +8,6 @@ import { router as authRouter } from './routes/auth';
 import { router as postRouter } from './routes/post';
 import { router as userStats } from "./routes/user";
 import { router as analyticsRouter } from './routes/analytics';
-
-// Ya no necesitas llamar a dotenv.config() aquí abajo, la línea 1 ya lo hizo.
 
 // Database Connection
 connectDB(); 

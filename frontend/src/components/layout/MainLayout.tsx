@@ -16,12 +16,10 @@ export const MainLayout = ({ children }: Props) => {
       
       <Navbar />
 
-      {/* CAMBIO: Reduje pb-24 a pb-12 para quitar el espacio excesivo */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-12"> 
         {children}
       </main>
 
-      {/* --- BOTÓN FLOTANTE (FAB) --- */}
       {!isCreatePostPage && (
         <Link
           to="/create-post"

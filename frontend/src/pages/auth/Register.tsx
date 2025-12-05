@@ -16,21 +16,19 @@ interface RegisterForm extends RegisterRequest {
 
 export default function Register() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // Controlamos el paso actual
+  const [step, setStep] = useState(1); 
   
   const { 
     register, 
     handleSubmit, 
     watch, 
-    trigger, // Importante: Para validar el paso 1 antes de avanzar
+    trigger, 
     formState: { errors, isSubmitting } 
   } = useForm<RegisterForm>({
-    mode: "onChange" // Valida mientras escribes
+    mode: "onChange" 
   });
 
-  // Función para avanzar al paso 2
   const handleNextStep = async () => {
-    // Validamos SOLO el campo email
     const isEmailValid = await trigger("email");
     if (isEmailValid) {
       setStep(2);
@@ -49,13 +47,12 @@ export default function Register() {
     };
 
   const password = watch("password");
-  const emailValue = watch("email"); // Para mostrar el correo en el paso 2
+  const emailValue = watch("email"); 
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg relative overflow-hidden">
         
-        {/* Barra de Progreso Superior */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
           <div 
             className="h-full bg-primary transition-all duration-500 ease-out"
@@ -63,7 +60,6 @@ export default function Register() {
           />
         </div>
 
-        {/* Encabezado Dinámico */}
         <div className="text-center mb-8 mt-2">
           <h1 className="text-3xl font-bold text-primary mb-2">
             {step === 1 ? "Comencemos" : "Casi listo"}
@@ -77,7 +73,6 @@ export default function Register() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           
-          {/* --- PASO 1: SOLO CORREO --- */}
           {step === 1 && (
             <div className="space-y-6 fade-in-animation">
               <div>
@@ -107,7 +102,7 @@ export default function Register() {
               </div>
 
               <button
-                type="button" // Importante: type="button" para no enviar el form todavía
+                type="button" 
                 onClick={handleNextStep}
                 className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2 group"
               >
@@ -117,11 +112,9 @@ export default function Register() {
             </div>
           )}
 
-          {/* --- PASO 2: DATOS RESTANTES --- */}
           {step === 2 && (
             <div className="space-y-5 fade-in-animation">
               
-              {/* Recordatorio del correo (Readonly) */}
               <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100 mb-4">
                 <div className="flex items-center gap-2 text-blue-800">
                   <EmailIcon fontSize="small" />

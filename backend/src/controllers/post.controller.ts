@@ -3,7 +3,6 @@ import PostModel from '../models/post.model';
 import UserModel from '../models/user.model';
 import { JwtPayload } from 'jsonwebtoken';
 
-// --- CONFIGURACIÓN BAD-WORDS ROBUSTA ---
 const badWordsRaw = require('bad-words');
 const Filter = badWordsRaw.default || badWordsRaw.Filter || badWordsRaw;
 
@@ -39,8 +38,8 @@ const createPost = async (req: RequestExt, res: Response) => {
 
         if (filter.isProfane(title) || filter.isProfane(description)) {
             return res.status(400).send({ 
-                error: 'PALABRAS_OFENSIVAS', // Para Android (Repository lee 'error')
-                code: 'PALABRAS_OFENSIVAS',  // Para Web
+                error: 'PALABRAS_OFENSIVAS',
+                code: 'PALABRAS_OFENSIVAS',
                 message: 'No se permiten palabras ofensivas.' 
             });
         }
@@ -68,14 +67,13 @@ const getPosts = async (req: Request, res: Response) => {
         let query: any = { isActive: true };
 
         if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } }
-            ];
+
+            query.$text = { $search: search as string };
         }
         if (category) query.category = category;
 
         const posts = await PostModel.find(query).populate('author', 'firstName email');
+        
         res.send(posts);
     } catch (e) {
         res.status(500).send({ code: 'ERROR_GET_POSTS' });
@@ -162,7 +160,7 @@ const updatePost = async (req: RequestExt, res: Response) => {
             { _id: id }, body, { new: true } 
         ).populate('author', 'firstName paternalSurname email phone');
 
-        res.send(response); // Enviamos objeto directo para no romper Android
+        res.send(response); 
 
     } catch (e) {
         console.log("ERROR EN UPDATE:", e);

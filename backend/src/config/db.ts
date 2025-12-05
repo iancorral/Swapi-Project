@@ -11,7 +11,7 @@ const connectDB = async (): Promise<void> => {
     } else {
         console.error(`[database]: Unknown error`);
     }
-    process.exit(1); // Detiene la app si falla la base de datos (Fail Fast)
+    process.exit(1); 
   }
 };
 

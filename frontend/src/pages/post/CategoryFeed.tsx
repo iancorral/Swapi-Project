@@ -5,13 +5,12 @@ import { ProductCard } from "../../components/ui/ProductCard";
 import type { Post } from "../../types/post.interface";
 
 export default function CategoryFeed() {
-    const { type } = useParams<{ type: string }>(); // 'ventas', 'rentas', etc.
+    const { type } = useParams<{ type: string }>(); 
     const [posts, setPosts] = useState<Post[]>([]);
 
     useEffect(() => {
         if (type) {
-            // Asumiendo que tu backend soporta filtro por query param ?category=...
-            // Si no, filtra en el cliente como en el Home.
+
             PostService.getAll(type).then(setPosts);
         }
     }, [type]);

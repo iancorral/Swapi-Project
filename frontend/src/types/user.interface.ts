@@ -1,14 +1,13 @@
-// Define la estructura de un Usuario
 export interface User {
-    _id: string; // MongoDB siempre devuelve _id
+    _id: string; 
     firstName: string;
-    paternalSurname?: string; // Opcional porque en tu modelo no es 'required' estricto a veces
+    paternalSurname?: string; 
     email: string;
     phone: string;
-    role: 'user' | 'admin'; // Tipado estricto de roles
-    avatar?: string; // Para la foto de perfil futura
+    role: 'user' | 'admin'; 
+    avatar?: string; 
     isVerified: boolean;
-    savedPosts?: string[]; // Array de IDs de posts guardados
+    savedPosts?: string[]; 
     createdAt?: string;
     updatedAt?: string;
 }

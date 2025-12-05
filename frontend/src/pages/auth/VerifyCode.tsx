@@ -15,12 +15,10 @@ export default function VerifyCode() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Obtenemos el email que pasamos desde la pantalla de Registro
   const email = location.state?.email;
 
   const { register, handleSubmit, formState: { isSubmitting } } = useForm<VerifyRequest>();
 
-  // Si alguien entra directo a la URL sin registrarse antes, lo sacamos
   if (!email) {
     navigate("/register");
     return null;
@@ -28,7 +26,6 @@ export default function VerifyCode() {
 
   const onSubmit = async (data: VerifyRequest) => {
     try {
-      // Llamamos al backend para verificar
       await AuthService.verifyCode(email, data.code);
       
       toast.success("¡Cuenta verificada! Ahora puedes iniciar sesión.");

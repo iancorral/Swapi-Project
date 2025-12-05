@@ -28,7 +28,6 @@ export default function CreatePost() {
     formState: { errors, isSubmitting }
   } = useForm<CreatePostForm>();
 
-  // Previsualización de imagen
   const imageFiles = watch("image");
   if (imageFiles && imageFiles.length > 0 && !preview) {
     const file = imageFiles[0];

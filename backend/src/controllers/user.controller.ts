@@ -6,7 +6,6 @@ interface RequestExt extends Request {
     user?: string | JwtPayload | any;
 }
 
-// TOGGLE GUARDADOS
 const toggleSavedPost = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id;
@@ -22,7 +21,7 @@ const toggleSavedPost = async (req: RequestExt, res: Response) => {
             await user.save();
             res.send({ 
                 success: true, 
-                code: 'MSG_SAVED_REMOVED', // Código para traducción
+                code: 'MSG_SAVED_REMOVED', 
                 saved: false, 
                 message: "Eliminado de guardados" 
             });
@@ -31,7 +30,7 @@ const toggleSavedPost = async (req: RequestExt, res: Response) => {
             await user.save();
             res.send({ 
                 success: true, 
-                code: 'MSG_SAVED_ADDED', // Código para traducción
+                code: 'MSG_SAVED_ADDED', 
                 saved: true, 
                 message: "Agregado a guardados" 
             });
@@ -43,7 +42,6 @@ const toggleSavedPost = async (req: RequestExt, res: Response) => {
     }
 };
 
-// GET GUARDADOS
 const getMySavedPosts = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id;
@@ -55,7 +53,7 @@ const getMySavedPosts = async (req: RequestExt, res: Response) => {
 
         if (!user) return res.status(404).send({ code: "USUARIO_NO_ENCONTRADO" });
 
-        res.send(user.savedPosts); // Enviamos array directo para no romper Android
+        res.send(user.savedPosts);
 
     } catch (e) {
         res.status(500).send({ code: "ERROR_GET_SAVED" });

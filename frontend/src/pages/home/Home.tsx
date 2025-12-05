@@ -81,7 +81,6 @@ export default function Home() {
                             </Link>
                         </div>
 
-                        {/* 👇 AQUÍ ESTÁ LA CLAVE */}
                         <div className="flex overflow-x-auto pb-4 gap-3 px-2 scrollbar-hide snap-x">
                             {categoryPosts.slice(0, 6).map(post => (
                                 <div
