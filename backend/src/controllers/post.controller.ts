@@ -33,7 +33,7 @@ const createPost = async (req: RequestExt, res: Response) => {
     try {
         const userId = req.user.id;
         const file = req.file; 
-        const pathPhoto = file ? `${file.filename}` : '';
+        const pathPhoto = file ? file.path : '';
         const { title, description, price, category } = req.body;
 
         if (filter.isProfane(title) || filter.isProfane(description)) {
