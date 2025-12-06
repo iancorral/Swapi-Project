@@ -16,8 +16,7 @@ export const PostService = {
     },
 
     create: async (formData: FormData): Promise<Post> => {
-        // TRUCO: Ponemos 'undefined' para que el navegador genere 
-        // automáticamente el 'boundary' correcto.
+
         const { data } = await api.post<Post>('/post', formData, {
             headers: {
                 "Content-Type": undefined, 

@@ -126,7 +126,7 @@ const deletePost = async (req: RequestExt, res: Response) => {
 
         res.send({ 
             success: true,
-            code: 'POST_DELETED_SUCCESS', // Código para traducción
+            code: 'POST_DELETED_SUCCESS', 
             message: 'Post eliminado correctamente', 
             deletedBy: isAdmin ? 'admin' : 'owner' 
         });

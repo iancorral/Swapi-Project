@@ -119,7 +119,6 @@ export const Dashboard = () => {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {/* AQUÍ ESTABA EL ERROR: Cambié 'entry' por '_' */}
                     {stats.charts.userSegments.map((_: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                     ))}

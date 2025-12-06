@@ -50,8 +50,7 @@ export default function EditPost() {
 
       if (post.images && post.images.length > 0) {
         const img = post.images[0];
-        // OJO: Si ya usas Cloudinary, img ya es la URL completa, así que esto de abajo está bien
-        // porque empieza con http.
+
         const fullUrl = img.startsWith('http') ? img : `http://localhost:3000/storage/${img}`;
         setPreview(fullUrl);
       }

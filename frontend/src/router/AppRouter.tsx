@@ -35,7 +35,6 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // AQUÍ ESTÁ EL TRUCO: Verificamos el rol
   if (user?.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
@@ -121,7 +120,7 @@ export const AppRouter = () => {
       <Route
         path="/admin/dashboard"
         element={
-          <AdminRoute> {/* <--- CAMBIO AQUÍ: Usamos AdminRoute en vez de ProtectedRoute */}
+          <AdminRoute> 
             <MainLayout>
               <Dashboard />
             </MainLayout>

@@ -58,7 +58,7 @@ const getDashboardStats = async (req: Request, res: Response) => {
             {
                 $project: {
                     _id: 0,
-                    name: "$sellerInfo.firstName", // O usa { $concat: ... } si prefieres
+                    name: "$sellerInfo.firstName", 
                     email: "$sellerInfo.email",
                     posts: "$totalPosts",
                     totalValue: "$totalRevenuePotencial"
