@@ -20,6 +20,7 @@ router.post('/', checkJwt, multerMiddleware.single('image'), createPost);
 router.get('/:id', getPost); 
 
 router.delete('/:id', checkJwt, deletePost);
-router.put('/:id', checkJwt, updatePost);
+
+router.put('/:id', checkJwt, multerMiddleware.single('image'), updatePost);
 
 export { router };
