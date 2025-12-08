@@ -1,27 +1,20 @@
-import nodemailer from 'nodemailer';
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail', 
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
+import emailjs from '@emailjs/nodejs';
 
 export const sendVerificationCode = async (email: string, code: string) => {
     try {
-        await transporter.sendMail({
-            from: `"Swapi Team" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: 'Welcome to Swapi! Verify your account',
-            html: `
-                <h3>Welcome to Swapi!</h3>
-                <p>Your verification code is:</p>
-                <h1>${code}</h1>
-                <p>This code expires in 15 minutes.</p>
-            `,
-        });
-        console.log(`[mailer]: Correo enviado a ${email}`); // Log de éxito
+        await emailjs.send(
+            process.env.EMAILJS_SERVICE_ID!, 
+            process.env.EMAILJS_TEMPLATE_ID!,
+            {
+                to_email: email,
+                code: code
+            },
+            {
+                publicKey: process.env.EMAILJS_PUBLIC_KEY!,
+                privateKey: process.env.EMAILJS_PRIVATE_KEY!,
+            }
+        );
+        console.log(`[mailer]: Correo enviado a ${email}`);
         return true;
     } catch (error) {
         console.error(`[mailer]: Error sending email:`, error);
